@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>A Very Important Question 💕</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #ff9a9e, #fad0c4, #ffecd2);
+      background-size: 400% 400%;
+      animation: gradientShift 6s ease infinite;
+      overflow: hidden;
+    }
+
+    @keyframes gradientShift {
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(10px);
+      border-radius: 24px;
+      padding: 48px 40px;
+      max-width: 480px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(255, 100, 130, 0.25);
+      position: relative;
+    }
+
+    .emoji {
+      font-size: 72px;
+      display: block;
+      margin-bottom: 20px;
+      animation: bounce 1.5s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-10px); }
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      color: #c0395a;
+      margin-bottom: 12px;
+      line-height: 1.3;
+    }
+
+    .subtitle {
+      font-size: 0.95rem;
+      color: #888;
+      margin-bottom: 32px;
+      font-style: italic;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 14px 36px;
+      border: none;
+      border-radius: 50px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    button:active { transform: scale(0.96); }
+
+    .btn-yes {
+      background: linear-gradient(135deg, #f857a6, #ff5858);
+      color: white;
+      box-shadow: 0 6px 20px rgba(248, 87, 166, 0.4);
+    }
+
+    .btn-yes:hover {
+      transform: scale(1.06);
+      box-shadow: 0 10px 28px rgba(248, 87, 166, 0.5);
+    }
+
+    .btn-no {
+      background: #f0f0f0;
+      color: #555;
+      position: relative;
+    }
+
+    .btn-no:hover { background: #e4e4e4; }
+
+    /* WIN SCREEN */
+    .win-screen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .win-screen .big-kiss {
+      font-size: 120px;
+      animation: heartPop 0.6s ease-out forwards;
+    }
+
+    @keyframes heartPop {
+      0%   { transform: scale(0) rotate(-20deg); opacity: 0; }
+      70%  { transform: scale(1.2) rotate(5deg); opacity: 1; }
+      100% { transform: scale(1) rotate(0deg); opacity: 1; }
+    }
+
+    .win-text {
+      font-size: 2rem;
+      font-weight: 900;
+      color: #c0395a;
+      animation: fadeSlideIn 0.8s 0.4s both;
+    }
+
+    .win-sub {
+      font-size: 1.1rem;
+      color: #888;
+      animation: fadeSlideIn 0.8s 0.7s both;
+    }
+
+    @keyframes fadeSlideIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* confetti */
+    .confetti-piece {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      animation: fall linear forwards;
+      pointer-events: none;
+    }
+
+    @keyframes fall {
+      0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+    }
+
+    .counter {
+      margin-top: 16px;
+      font-size: 0.8rem;
+      color: #bbb;
+    }
+  </style>
+</head>
+<body>
+
+<div class="card" id="questionCard">
+  <span class="emoji" id="emoji">😏</span>
+  <h1 id="question">Hey babe… wanna get banged? 😈</h1>
+  <p class="subtitle" id="subtitle">Think carefully before you answer…</p>
+
+  <div class="buttons">
+    <button class="btn-yes" onclick="sayYes()">Yes 💕</button>
+    <button class="btn-no" id="noBtn" onclick="sayNo()">No 🙅‍♀️</button>
+  </div>
+
+  <div class="counter" id="counter"></div>
+
+  <div class="win-screen" id="winScreen">
+    <div class="big-kiss">😘</div>
+    <div class="win-text">Let's goooooo guuuuurl!! 🎉</div>
+    <div class="win-sub">Knew you'd come around 😏💖</div>
+  </div>
+</div>
+
+<script>
+  const rounds = [
+    {
+      emoji: "😏",
+      q: "Hey babe… wanna get banged? 😈",
+      sub: "Think carefully before you answer…"
+    },
+    {
+      emoji: "🥺",
+      q: "Are you SURE you don't want to get banged?",
+      sub: "Really really sure? …Really?"
+    },
+    {
+      emoji: "🤔",
+      q: "What if I told you it would be amazing?",
+      sub: "Scientifically proven. Probably."
+    },
+    {
+      emoji: "😤",
+      q: "Ok fine. But… bang tho? 🥁",
+      sub: "This is your third chance. Just saying."
+    },
+    {
+      emoji: "🐶",
+      q: "Even the dog thinks you should say yes.",
+      sub: "He told me himself."
+    },
+    {
+      emoji: "🕵️",
+      q: "Sources confirm: saying yes is the move.",
+      sub: "Multiple sources. Very reliable."
+    },
+    {
+      emoji: "🎯",
+      q: "Fun fact: people who say yes live 10 years longer.",
+      sub: "I made that up but still."
+    },
+    {
+      emoji: "🌈",
+      q: "Imagine how great you'd feel if you just said yes.",
+      sub: "Breathtaking. Life-changing. Magical."
+    },
+    {
+      emoji: "😂",
+      q: "Girl… it's just a bang. C'mon now.",
+      sub: "We're on attempt #ATTEMPT#. At this point…"
+    },
+    {
+      emoji: "🙏",
+      q: "I'm literally begging you. BANG?",
+      sub: "On my knees. Metaphorically. (Or not.)"
+    },
+    {
+      emoji: "💀",
+      q: "You've said no #ATTEMPT# times. Legend status.",
+      sub: "But also… yes? 👀"
+    },
+    {
+      emoji: "🔁",
+      q: "I will literally keep asking forever.",
+      sub: "This is not a threat. It is a promise. 💕"
+    }
+  ];
+
+  let attempt = 0;
+
+  function getQuestion() {
+    const r = rounds[Math.min(attempt, rounds.length - 1)];
+    return {
+      emoji: r.emoji,
+      q: r.q.replace('#ATTEMPT#', attempt),
+      sub: r.sub.replace('#ATTEMPT#', attempt)
+    };
+  }
+
+  function sayNo() {
+    attempt++;
+    const { emoji, q, sub } = getQuestion();
+    document.getElementById('emoji').textContent = emoji;
+    document.getElementById('question').textContent = q;
+    document.getElementById('subtitle').textContent = sub;
+
+    if (attempt > 2) {
+      document.getElementById('counter').textContent =
+        `No count: ${attempt} 😬`;
+    }
+
+    // Wiggle the No button away a little for fun
+    const btn = document.getElementById('noBtn');
+    const x = (Math.random() - 0.5) * 60;
+    const y = (Math.random() - 0.5) * 30;
+    btn.style.transform = `translate(${x}px, ${y}px)`;
+    setTimeout(() => btn.style.transform = '', 400);
+  }
+
+  function sayYes() {
+    // Hide question, show win
+    document.getElementById('emoji').style.display = 'none';
+    document.getElementById('question').style.display = 'none';
+    document.getElementById('subtitle').style.display = 'none';
+    document.querySelector('.buttons').style.display = 'none';
+    document.getElementById('counter').style.display = 'none';
+    document.getElementById('winScreen').style.display = 'flex';
+
+    launchConfetti();
+  }
+
+  function launchConfetti() {
+    const colors = ['#f857a6','#ff5858','#ffd700','#a0f0a0','#87ceeb','#ff8c00'];
+    for (let i = 0; i < 120; i++) {
+      const el = document.createElement('div');
+      el.className = 'confetti-piece';
+      el.style.left = Math.random() * 100 + 'vw';
+      el.style.top = '-20px';
+      el.style.background = colors[Math.floor(Math.random() * colors.length)];
+      el.style.animationDuration = (Math.random() * 2 + 2) + 's';
+      el.style.animationDelay = (Math.random() * 1.5) + 's';
+      el.style.width = el.style.height = (Math.random() * 8 + 6) + 'px';
+      document.body.appendChild(el);
+      el.addEventListener('animationend', () => el.remove());
+    }
+  }
+</script>
+
+</body>
+</html>
