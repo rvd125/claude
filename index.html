@@ -1,309 +1,620 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>A Very Important Question 💕</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PlanConvert — Feet &amp; Inches → Millimetres</title>
+<style>
+  :root {
+    --bg: #f4f6f9;
+    --panel: #ffffff;
+    --ink: #1c2733;
+    --muted: #64748b;
+    --line: #e2e8f0;
+    --brand: #1d4ed8;
+    --brand-dark: #1e40af;
+    --brand-soft: #eff4ff;
+    --accent: #0f766e;
+    --danger: #b91c1c;
+    --ok: #15803d;
+    --shadow: 0 1px 2px rgba(16,24,40,.06), 0 8px 24px rgba(16,24,40,.06);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
 
-    body {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #ff9a9e, #fad0c4, #ffecd2);
-      background-size: 400% 400%;
-      animation: gradientShift 6s ease infinite;
-      overflow: hidden;
-    }
+  /* Header */
+  header {
+    background: linear-gradient(120deg, #1e3a8a, #1d4ed8);
+    color: #fff;
+    padding: 22px 24px;
+  }
+  .header-inner {
+    max-width: 1080px; margin: 0 auto;
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  }
+  .logo {
+    width: 46px; height: 46px; border-radius: 11px;
+    background: rgba(255,255,255,.14);
+    display: grid; place-items: center;
+    font-size: 22px; flex-shrink: 0;
+    border: 1px solid rgba(255,255,255,.25);
+  }
+  .header-text h1 { margin: 0; font-size: 1.35rem; font-weight: 700; letter-spacing: -.01em; }
+  .header-text p { margin: 2px 0 0; font-size: .9rem; opacity: .85; }
+  .header-spacer { flex: 1; }
+  .gear {
+    background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.25);
+    color: #fff; border-radius: 9px; padding: 9px 14px; cursor: pointer;
+    font-size: .88rem; font-weight: 600; transition: background .15s;
+  }
+  .gear:hover { background: rgba(255,255,255,.26); }
 
-    @keyframes gradientShift {
-      0%   { background-position: 0% 50%; }
-      50%  { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
+  main { max-width: 1080px; margin: 0 auto; padding: 24px; }
 
-    .card {
-      background: rgba(255, 255, 255, 0.85);
-      backdrop-filter: blur(10px);
-      border-radius: 24px;
-      padding: 48px 40px;
-      max-width: 480px;
-      width: 90%;
-      text-align: center;
-      box-shadow: 0 20px 60px rgba(255, 100, 130, 0.25);
-      position: relative;
-    }
+  /* Tabs */
+  .tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+  .tab {
+    background: transparent; border: 1px solid transparent;
+    padding: 10px 18px; border-radius: 10px; cursor: pointer;
+    font-size: .95rem; font-weight: 600; color: var(--muted);
+    transition: all .15s;
+  }
+  .tab:hover { color: var(--ink); }
+  .tab.active { background: var(--panel); color: var(--brand); box-shadow: var(--shadow); }
 
-    .emoji {
-      font-size: 72px;
-      display: block;
-      margin-bottom: 20px;
-      animation: bounce 1.5s infinite;
-    }
+  .panel {
+    background: var(--panel); border-radius: 16px; padding: 26px;
+    box-shadow: var(--shadow); border: 1px solid var(--line);
+  }
+  .panel.hidden { display: none; }
 
-    @keyframes bounce {
-      0%, 100% { transform: translateY(0); }
-      50%       { transform: translateY(-10px); }
-    }
+  h2.section { margin: 0 0 4px; font-size: 1.15rem; font-weight: 700; }
+  .sub { color: var(--muted); font-size: .9rem; margin: 0 0 22px; }
 
-    h1 {
-      font-size: 1.6rem;
-      color: #c0395a;
-      margin-bottom: 12px;
-      line-height: 1.3;
-    }
+  /* Form */
+  .form-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr auto;
+    gap: 12px; align-items: end;
+  }
+  @media (max-width: 640px) { .form-row { grid-template-columns: 1fr 1fr; } .form-row .add-cell { grid-column: 1 / -1; } }
+  .field label {
+    display: block; font-size: .78rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin-bottom: 6px;
+  }
+  .field input {
+    width: 100%; padding: 11px 13px; border: 1px solid var(--line);
+    border-radius: 10px; font-size: 1rem; color: var(--ink); background: #fff;
+    transition: border .15s, box-shadow .15s;
+  }
+  .field input:focus { outline: none; border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-soft); }
 
-    .subtitle {
-      font-size: 0.95rem;
-      color: #888;
-      margin-bottom: 32px;
-      font-style: italic;
-    }
+  .btn {
+    border: none; border-radius: 10px; padding: 11px 20px; cursor: pointer;
+    font-size: .95rem; font-weight: 600; transition: background .15s, opacity .15s; white-space: nowrap;
+  }
+  .btn-primary { background: var(--brand); color: #fff; }
+  .btn-primary:hover { background: var(--brand-dark); }
+  .btn-ghost { background: #fff; color: var(--ink); border: 1px solid var(--line); }
+  .btn-ghost:hover { background: #f8fafc; }
+  .btn:disabled { opacity: .55; cursor: not-allowed; }
 
-    .buttons {
-      display: flex;
-      gap: 16px;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
+  .live-result {
+    margin-top: 16px; padding: 14px 16px; border-radius: 10px;
+    background: var(--brand-soft); border: 1px solid #dbe5ff;
+    font-size: .95rem; color: var(--brand-dark); display: none;
+  }
+  .live-result strong { font-size: 1.05rem; }
 
-    button {
-      padding: 14px 36px;
-      border: none;
-      border-radius: 50px;
-      font-size: 1.1rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: transform 0.15s, box-shadow 0.15s;
-    }
+  /* Table */
+  .table-wrap { margin-top: 24px; overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: .94rem; }
+  thead th {
+    text-align: left; padding: 10px 12px; font-size: .76rem; text-transform: uppercase;
+    letter-spacing: .04em; color: var(--muted); border-bottom: 2px solid var(--line); font-weight: 700;
+  }
+  tbody td { padding: 11px 12px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+  tbody tr:hover { background: #f8fafc; }
+  td.mm { font-weight: 700; color: var(--accent); white-space: nowrap; }
+  td.meters { color: var(--muted); white-space: nowrap; }
+  .roomname { font-weight: 600; }
+  .orig { color: var(--muted); font-size: .85rem; }
+  .del {
+    background: none; border: none; color: var(--danger); cursor: pointer;
+    font-size: 1rem; padding: 4px 8px; border-radius: 6px; line-height: 1;
+  }
+  .del:hover { background: #fef2f2; }
 
-    button:active { transform: scale(0.96); }
+  .empty { text-align: center; color: var(--muted); padding: 30px 10px; font-style: italic; }
 
-    .btn-yes {
-      background: linear-gradient(135deg, #f857a6, #ff5858);
-      color: white;
-      box-shadow: 0 6px 20px rgba(248, 87, 166, 0.4);
-    }
+  .toolbar { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
 
-    .btn-yes:hover {
-      transform: scale(1.06);
-      box-shadow: 0 10px 28px rgba(248, 87, 166, 0.5);
-    }
+  /* Dropzone */
+  .drop {
+    border: 2px dashed #cbd5e1; border-radius: 14px; padding: 38px 20px; text-align: center;
+    cursor: pointer; transition: border .15s, background .15s; background: #fafbfc;
+  }
+  .drop:hover, .drop.over { border-color: var(--brand); background: var(--brand-soft); }
+  .drop .icon { font-size: 38px; }
+  .drop p { margin: 8px 0 0; color: var(--muted); }
+  .drop .fname { color: var(--brand-dark); font-weight: 600; margin-top: 10px; }
 
-    .btn-no {
-      background: #f0f0f0;
-      color: #555;
-      position: relative;
-    }
+  .status {
+    margin-top: 16px; font-size: .92rem; padding: 12px 14px; border-radius: 10px; display: none;
+  }
+  .status.show { display: block; }
+  .status.info { background: var(--brand-soft); color: var(--brand-dark); border: 1px solid #dbe5ff; }
+  .status.error { background: #fef2f2; color: var(--danger); border: 1px solid #fecaca; }
+  .status.success { background: #f0fdf4; color: var(--ok); border: 1px solid #bbf7d0; }
 
-    .btn-no:hover { background: #e4e4e4; }
+  .spinner {
+    display: inline-block; width: 15px; height: 15px; border: 2px solid currentColor;
+    border-right-color: transparent; border-radius: 50%; vertical-align: -2px; margin-right: 8px;
+    animation: spin .7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* WIN SCREEN */
-    .win-screen {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      gap: 16px;
-    }
+  /* Modal */
+  .modal-bg {
+    position: fixed; inset: 0; background: rgba(15,23,42,.55); display: none;
+    align-items: center; justify-content: center; padding: 20px; z-index: 50;
+  }
+  .modal-bg.show { display: flex; }
+  .modal {
+    background: #fff; border-radius: 16px; padding: 26px; max-width: 480px; width: 100%;
+    box-shadow: 0 20px 60px rgba(0,0,0,.3);
+  }
+  .modal h3 { margin: 0 0 6px; font-size: 1.15rem; }
+  .modal p.note { font-size: .85rem; color: var(--muted); margin: 0 0 18px; }
+  .modal label { display:block; font-size:.78rem; font-weight:600; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); margin-bottom:6px; }
+  .modal input, .modal select {
+    width: 100%; padding: 11px 13px; border: 1px solid var(--line); border-radius: 10px; font-size: 1rem; margin-bottom: 16px;
+  }
+  .modal input:focus, .modal select:focus { outline:none; border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-soft); }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+  .keyhint { font-size:.8rem; color:var(--muted); margin: -8px 0 16px; }
+  .keyhint a { color: var(--brand); }
 
-    .win-screen .big-kiss {
-      font-size: 120px;
-      animation: heartPop 0.6s ease-out forwards;
-    }
+  footer { text-align: center; color: var(--muted); font-size: .82rem; padding: 10px 20px 36px; }
 
-    @keyframes heartPop {
-      0%   { transform: scale(0) rotate(-20deg); opacity: 0; }
-      70%  { transform: scale(1.2) rotate(5deg); opacity: 1; }
-      100% { transform: scale(1) rotate(0deg); opacity: 1; }
-    }
-
-    .win-text {
-      font-size: 2rem;
-      font-weight: 900;
-      color: #c0395a;
-      animation: fadeSlideIn 0.8s 0.4s both;
-    }
-
-    .win-sub {
-      font-size: 1.1rem;
-      color: #888;
-      animation: fadeSlideIn 0.8s 0.7s both;
-    }
-
-    @keyframes fadeSlideIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    /* confetti */
-    .confetti-piece {
-      position: fixed;
-      width: 10px;
-      height: 10px;
-      border-radius: 2px;
-      animation: fall linear forwards;
-      pointer-events: none;
-    }
-
-    @keyframes fall {
-      0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
-      100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
-    }
-
-    .counter {
-      margin-top: 16px;
-      font-size: 0.8rem;
-      color: #bbb;
-    }
-  </style>
+  @media print {
+    header, .tabs, .toolbar, .form-row, .drop, .gear, .status, .live-result, footer { display: none !important; }
+    .panel { box-shadow: none; border: none; padding: 0; }
+    body { background: #fff; }
+  }
+</style>
 </head>
 <body>
 
-<div class="card" id="questionCard">
-  <span class="emoji" id="emoji">😏</span>
-  <h1 id="question">Hey babe… wanna get banged? 😈</h1>
-  <p class="subtitle" id="subtitle">Think carefully before you answer…</p>
+<header>
+  <div class="header-inner">
+    <div class="logo">📐</div>
+    <div class="header-text">
+      <h1>PlanConvert</h1>
+      <p>Convert building plan measurements from feet &amp; inches to millimetres</p>
+    </div>
+    <div class="header-spacer"></div>
+    <button class="gear" id="openSettings">⚙ API Settings</button>
+  </div>
+</header>
 
-  <div class="buttons">
-    <button class="btn-yes" onclick="sayYes()">Yes 💕</button>
-    <button class="btn-no" id="noBtn" onclick="sayNo()">No 🙅‍♀️</button>
+<main>
+  <div class="tabs">
+    <button class="tab active" data-tab="manual">✏️ Manual Converter</button>
+    <button class="tab" data-tab="pdf">📄 PDF Import (AI)</button>
   </div>
 
-  <div class="counter" id="counter"></div>
+  <!-- MANUAL -->
+  <section class="panel" id="tab-manual">
+    <h2 class="section">Manual converter</h2>
+    <p class="sub">Enter a room name and its measurement in feet and inches. Conversion is exact (1 ft = 304.8 mm, 1 in = 25.4 mm).</p>
 
-  <div class="win-screen" id="winScreen">
-    <div class="big-kiss">😘</div>
-    <div class="win-text">Let's goooooo guuuuurl!! 🎉</div>
-    <div class="win-sub">Knew you'd come around 😏💖</div>
+    <form class="form-row" id="manualForm">
+      <div class="field">
+        <label for="roomName">Room / label</label>
+        <input id="roomName" type="text" placeholder="e.g. Master Bedroom — Width" autocomplete="off" />
+      </div>
+      <div class="field">
+        <label for="feet">Feet</label>
+        <input id="feet" type="number" inputmode="decimal" step="any" min="0" placeholder="0" />
+      </div>
+      <div class="field">
+        <label for="inches">Inches</label>
+        <input id="inches" type="number" inputmode="decimal" step="any" min="0" placeholder="0" />
+      </div>
+      <div class="field add-cell">
+        <label>&nbsp;</label>
+        <button class="btn btn-primary" type="submit">+ Add</button>
+      </div>
+    </form>
+
+    <div class="live-result" id="liveResult"></div>
+
+    <div class="table-wrap">
+      <table id="manualTable">
+        <thead>
+          <tr><th>Room / label</th><th>Feet &amp; inches</th><th>Millimetres</th><th>Metres</th><th></th></tr>
+        </thead>
+        <tbody id="manualBody">
+          <tr><td colspan="5" class="empty">No measurements yet — add one above.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="toolbar">
+      <button class="btn btn-ghost" id="manualCsv">⬇ Export CSV</button>
+      <button class="btn btn-ghost" id="manualPrint">🖨 Print</button>
+      <button class="btn btn-ghost" id="manualClear">🗑 Clear all</button>
+    </div>
+  </section>
+
+  <!-- PDF -->
+  <section class="panel hidden" id="tab-pdf">
+    <h2 class="section">PDF import with AI</h2>
+    <p class="sub">Upload a marked-up plan or schedule. Claude reads it, finds each room and its feet &amp; inches dimensions, and we convert them to millimetres for you.</p>
+
+    <div class="drop" id="drop">
+      <div class="icon">📄</div>
+      <p><strong>Click to choose a PDF</strong> or drag &amp; drop it here</p>
+      <div class="fname" id="fname"></div>
+      <input type="file" id="fileInput" accept="application/pdf" hidden />
+    </div>
+
+    <div class="toolbar">
+      <button class="btn btn-primary" id="analyzeBtn" disabled>✨ Extract &amp; convert</button>
+    </div>
+
+    <div class="status" id="pdfStatus"></div>
+
+    <div class="table-wrap" id="pdfTableWrap" style="display:none;">
+      <table id="pdfTable">
+        <thead>
+          <tr><th>Room</th><th>Dimension</th><th>On plan</th><th>Feet &amp; inches</th><th>Millimetres</th><th>Metres</th></tr>
+        </thead>
+        <tbody id="pdfBody"></tbody>
+      </table>
+    </div>
+
+    <div class="toolbar" id="pdfToolbar" style="display:none;">
+      <button class="btn btn-ghost" id="pdfCsv">⬇ Export CSV</button>
+      <button class="btn btn-ghost" id="pdfPrint">🖨 Print</button>
+      <button class="btn btn-ghost" id="pdfToManual">↪ Send to manual list</button>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Conversions are exact (25.4 mm per inch). Values are rounded to the nearest whole millimetre. Your API key stays in this browser.
+</footer>
+
+<!-- Settings modal -->
+<div class="modal-bg" id="settingsModal">
+  <div class="modal">
+    <h3>API Settings</h3>
+    <p class="note">PlanConvert calls the Anthropic (Claude) API directly from your browser to read PDFs. Your key is saved only in this browser's local storage and is sent only to api.anthropic.com.</p>
+    <label for="apiKey">Anthropic API key</label>
+    <input id="apiKey" type="password" placeholder="sk-ant-..." autocomplete="off" />
+    <p class="keyhint">Get a key at <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">console.anthropic.com</a>.</p>
+    <label for="modelSelect">Model</label>
+    <select id="modelSelect">
+      <option value="claude-opus-4-8">Claude Opus 4.8 — most capable (recommended)</option>
+      <option value="claude-sonnet-4-6">Claude Sonnet 4.6 — faster &amp; cheaper</option>
+      <option value="claude-haiku-4-5">Claude Haiku 4.5 — fastest</option>
+    </select>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="closeSettings">Cancel</button>
+      <button class="btn btn-primary" id="saveSettings">Save</button>
+    </div>
   </div>
 </div>
 
 <script>
-  const rounds = [
-    {
-      emoji: "😏",
-      q: "Hey babe… wanna get banged? 😈",
-      sub: "Think carefully before you answer…"
-    },
-    {
-      emoji: "🥺",
-      q: "Are you SURE you don't want to get banged?",
-      sub: "Really really sure? …Really?"
-    },
-    {
-      emoji: "🤔",
-      q: "What if I told you it would be amazing?",
-      sub: "Scientifically proven. Probably."
-    },
-    {
-      emoji: "😤",
-      q: "Ok fine. But… bang tho? 🥁",
-      sub: "This is your third chance. Just saying."
-    },
-    {
-      emoji: "🐶",
-      q: "Even the dog thinks you should say yes.",
-      sub: "He told me himself."
-    },
-    {
-      emoji: "🕵️",
-      q: "Sources confirm: saying yes is the move.",
-      sub: "Multiple sources. Very reliable."
-    },
-    {
-      emoji: "🎯",
-      q: "Fun fact: people who say yes live 10 years longer.",
-      sub: "I made that up but still."
-    },
-    {
-      emoji: "🌈",
-      q: "Imagine how great you'd feel if you just said yes.",
-      sub: "Breathtaking. Life-changing. Magical."
-    },
-    {
-      emoji: "😂",
-      q: "Girl… it's just a bang. C'mon now.",
-      sub: "We're on attempt #ATTEMPT#. At this point…"
-    },
-    {
-      emoji: "🙏",
-      q: "I'm literally begging you. BANG?",
-      sub: "On my knees. Metaphorically. (Or not.)"
-    },
-    {
-      emoji: "💀",
-      q: "You've said no #ATTEMPT# times. Legend status.",
-      sub: "But also… yes? 👀"
-    },
-    {
-      emoji: "🔁",
-      q: "I will literally keep asking forever.",
-      sub: "This is not a threat. It is a promise. 💕"
+/* ---------- Conversion ---------- */
+const MM_PER_INCH = 25.4;
+const MM_PER_FOOT = 304.8;
+function toMm(feet, inches) {
+  return (Number(feet || 0) * MM_PER_FOOT) + (Number(inches || 0) * MM_PER_INCH);
+}
+function fmtMm(mm) { return Math.round(mm).toLocaleString() + " mm"; }
+function fmtM(mm)  { return (mm / 1000).toFixed(3) + " m"; }
+function fmtFtIn(feet, inches) {
+  const f = Number(feet || 0), i = Number(inches || 0);
+  let parts = [];
+  if (f) parts.push(f + "′");
+  if (i || !f) parts.push((Number.isInteger(i) ? i : i) + "″");
+  return parts.join(" ");
+}
+
+/* ---------- Settings ---------- */
+const LS_KEY = "planconvert_key";
+const LS_MODEL = "planconvert_model";
+function getKey()   { return localStorage.getItem(LS_KEY) || ""; }
+function getModel() { return localStorage.getItem(LS_MODEL) || "claude-opus-4-8"; }
+
+const settingsModal = document.getElementById("settingsModal");
+const apiKeyInput = document.getElementById("apiKey");
+const modelSelect = document.getElementById("modelSelect");
+
+function openSettings() {
+  apiKeyInput.value = getKey();
+  modelSelect.value = getModel();
+  settingsModal.classList.add("show");
+}
+function closeSettings() { settingsModal.classList.remove("show"); }
+document.getElementById("openSettings").onclick = openSettings;
+document.getElementById("closeSettings").onclick = closeSettings;
+settingsModal.onclick = (e) => { if (e.target === settingsModal) closeSettings(); };
+document.getElementById("saveSettings").onclick = () => {
+  localStorage.setItem(LS_KEY, apiKeyInput.value.trim());
+  localStorage.setItem(LS_MODEL, modelSelect.value);
+  closeSettings();
+};
+
+/* ---------- Tabs ---------- */
+document.querySelectorAll(".tab").forEach(tab => {
+  tab.onclick = () => {
+    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+    tab.classList.add("active");
+    document.getElementById("tab-manual").classList.toggle("hidden", tab.dataset.tab !== "manual");
+    document.getElementById("tab-pdf").classList.toggle("hidden", tab.dataset.tab !== "pdf");
+  };
+});
+
+/* ---------- Manual converter ---------- */
+const manualRows = []; // {name, feet, inches}
+const manualBody = document.getElementById("manualBody");
+const liveResult = document.getElementById("liveResult");
+
+const roomName = document.getElementById("roomName");
+const feetIn = document.getElementById("feet");
+const inchesIn = document.getElementById("inches");
+
+function updateLive() {
+  const f = feetIn.value, i = inchesIn.value;
+  if (f === "" && i === "") { liveResult.style.display = "none"; return; }
+  const mm = toMm(f, i);
+  liveResult.style.display = "block";
+  liveResult.innerHTML = `Preview: ${fmtFtIn(f, i) || "0″"} = <strong>${fmtMm(mm)}</strong> &nbsp;(${fmtM(mm)})`;
+}
+feetIn.oninput = updateLive;
+inchesIn.oninput = updateLive;
+
+function renderManual() {
+  if (!manualRows.length) {
+    manualBody.innerHTML = `<tr><td colspan="5" class="empty">No measurements yet — add one above.</td></tr>`;
+    return;
+  }
+  manualBody.innerHTML = manualRows.map((r, idx) => {
+    const mm = toMm(r.feet, r.inches);
+    return `<tr>
+      <td class="roomname">${escapeHtml(r.name)}</td>
+      <td>${fmtFtIn(r.feet, r.inches)}</td>
+      <td class="mm">${fmtMm(mm)}</td>
+      <td class="meters">${fmtM(mm)}</td>
+      <td style="text-align:right"><button class="del" data-idx="${idx}" title="Remove">✕</button></td>
+    </tr>`;
+  }).join("");
+  manualBody.querySelectorAll(".del").forEach(b => {
+    b.onclick = () => { manualRows.splice(Number(b.dataset.idx), 1); renderManual(); };
+  });
+}
+
+document.getElementById("manualForm").onsubmit = (e) => {
+  e.preventDefault();
+  const name = roomName.value.trim() || "Measurement";
+  const f = feetIn.value, i = inchesIn.value;
+  if (f === "" && i === "") { roomName.focus(); return; }
+  manualRows.push({ name, feet: Number(f || 0), inches: Number(i || 0) });
+  renderManual();
+  roomName.value = ""; feetIn.value = ""; inchesIn.value = "";
+  liveResult.style.display = "none";
+  roomName.focus();
+};
+
+document.getElementById("manualClear").onclick = () => {
+  if (manualRows.length && confirm("Clear all manual measurements?")) { manualRows.length = 0; renderManual(); }
+};
+document.getElementById("manualCsv").onclick = () => exportCsv(manualRows.map(r => {
+  const mm = toMm(r.feet, r.inches);
+  return { Room: r.name, Feet: r.feet, Inches: r.inches, Millimetres: Math.round(mm), Metres: (mm/1000).toFixed(3) };
+}), "planconvert-manual.csv");
+document.getElementById("manualPrint").onclick = () => window.print();
+
+/* ---------- Helpers ---------- */
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+}
+function exportCsv(rows, filename) {
+  if (!rows.length) { alert("Nothing to export yet."); return; }
+  const headers = Object.keys(rows[0]);
+  const esc = (v) => { const s = String(v ?? ""); return /[",\n]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s; };
+  const csv = [headers.join(",")].concat(rows.map(r => headers.map(h => esc(r[h])).join(","))).join("\n");
+  const blob = new Blob([csv], { type: "text/csv" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = filename; a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+/* ---------- PDF import ---------- */
+const drop = document.getElementById("drop");
+const fileInput = document.getElementById("fileInput");
+const fnameEl = document.getElementById("fname");
+const analyzeBtn = document.getElementById("analyzeBtn");
+const pdfStatus = document.getElementById("pdfStatus");
+const pdfBody = document.getElementById("pdfBody");
+const pdfTableWrap = document.getElementById("pdfTableWrap");
+const pdfToolbar = document.getElementById("pdfToolbar");
+
+let selectedFile = null;
+let pdfResults = []; // {room, dimension, original, feet, inches}
+
+drop.onclick = () => fileInput.click();
+drop.ondragover = (e) => { e.preventDefault(); drop.classList.add("over"); };
+drop.ondragleave = () => drop.classList.remove("over");
+drop.ondrop = (e) => {
+  e.preventDefault(); drop.classList.remove("over");
+  if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+};
+fileInput.onchange = () => { if (fileInput.files.length) handleFile(fileInput.files[0]); };
+
+function handleFile(file) {
+  if (file.type !== "application/pdf") { showStatus("error", "Please choose a PDF file."); return; }
+  selectedFile = file;
+  fnameEl.textContent = "✓ " + file.name + " (" + (file.size/1024/1024).toFixed(2) + " MB)";
+  analyzeBtn.disabled = false;
+  pdfStatus.classList.remove("show");
+}
+
+function showStatus(kind, html) {
+  pdfStatus.className = "status show " + kind;
+  pdfStatus.innerHTML = html;
+}
+
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(",")[1]); // strip data: prefix
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+const EXTRACT_SCHEMA = {
+  type: "object",
+  properties: {
+    measurements: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          room: { type: "string", description: "Name of the room or space (e.g. Master Bedroom, Kitchen, Hallway)" },
+          dimension: { type: "string", description: "What this measurement is (e.g. Width, Length, Height, Ceiling, or a general label)" },
+          original: { type: "string", description: "The exact text as written on the plan, e.g. 12'-6\"" },
+          feet: { type: "number", description: "Whole feet component as a number" },
+          inches: { type: "number", description: "Inches component as a decimal number (convert fractions like 1/2 to 0.5)" }
+        },
+        required: ["room", "dimension", "original", "feet", "inches"],
+        additionalProperties: false
+      }
     }
-  ];
+  },
+  required: ["measurements"],
+  additionalProperties: false
+};
 
-  let attempt = 0;
+const SYSTEM_PROMPT =
+  "You are an assistant for a building/construction professional. You read architectural plans, " +
+  "floor plans and room schedules. Extract every room or space and each of its dimensional measurements " +
+  "that are given in imperial units (feet and/or inches). For each measurement, return the room name, a " +
+  "label for the dimension (Width, Length, Height, etc.), the original text exactly as written, and the " +
+  "feet and inches as numeric components. Convert any fractional inches to decimals (e.g. 6 1/2\" -> inches 6.5). " +
+  "If a measurement is only in inches, set feet to 0. Do NOT convert to millimetres yourself. " +
+  "If you cannot find any imperial measurements, return an empty list.";
 
-  function getQuestion() {
-    const r = rounds[Math.min(attempt, rounds.length - 1)];
-    return {
-      emoji: r.emoji,
-      q: r.q.replace('#ATTEMPT#', attempt),
-      sub: r.sub.replace('#ATTEMPT#', attempt)
-    };
-  }
+analyzeBtn.onclick = async () => {
+  const key = getKey();
+  if (!key) { showStatus("error", "No API key set. Click <strong>⚙ API Settings</strong> (top right) to add your Anthropic key."); openSettings(); return; }
+  if (!selectedFile) return;
 
-  function sayNo() {
-    attempt++;
-    const { emoji, q, sub } = getQuestion();
-    document.getElementById('emoji').textContent = emoji;
-    document.getElementById('question').textContent = q;
-    document.getElementById('subtitle').textContent = sub;
+  analyzeBtn.disabled = true;
+  showStatus("info", '<span class="spinner"></span> Reading the plan with ' + escapeHtml(getModel()) + '… this can take 20–60 seconds for a detailed drawing.');
+  pdfTableWrap.style.display = "none";
+  pdfToolbar.style.display = "none";
 
-    if (attempt > 2) {
-      document.getElementById('counter').textContent =
-        `No count: ${attempt} 😬`;
+  try {
+    const b64 = await fileToBase64(selectedFile);
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-api-key": key,
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true"
+      },
+      body: JSON.stringify({
+        model: getModel(),
+        max_tokens: 16000,
+        system: SYSTEM_PROMPT,
+        output_config: { format: { type: "json_schema", schema: EXTRACT_SCHEMA } },
+        messages: [{
+          role: "user",
+          content: [
+            { type: "document", source: { type: "base64", media_type: "application/pdf", data: b64 } },
+            { type: "text", text: "Extract all rooms and their feet/inches measurements from this plan." }
+          ]
+        }]
+      })
+    });
+
+    if (!res.ok) {
+      let detail = "";
+      try { const err = await res.json(); detail = err.error?.message || JSON.stringify(err); } catch (_) { detail = await res.text(); }
+      if (res.status === 401) throw new Error("Invalid API key (401). Check it in ⚙ API Settings.");
+      if (res.status === 429) throw new Error("Rate limited (429). Wait a moment and try again.");
+      throw new Error("API error " + res.status + ": " + detail);
     }
 
-    // Wiggle the No button away a little for fun
-    const btn = document.getElementById('noBtn');
-    const x = (Math.random() - 0.5) * 60;
-    const y = (Math.random() - 0.5) * 30;
-    btn.style.transform = `translate(${x}px, ${y}px)`;
-    setTimeout(() => btn.style.transform = '', 400);
-  }
+    const data = await res.json();
+    if (data.stop_reason === "refusal") throw new Error("The model declined to process this document.");
+    const textBlock = (data.content || []).find(b => b.type === "text");
+    if (!textBlock) throw new Error("Empty response from the model.");
 
-  function sayYes() {
-    // Hide question, show win
-    document.getElementById('emoji').style.display = 'none';
-    document.getElementById('question').style.display = 'none';
-    document.getElementById('subtitle').style.display = 'none';
-    document.querySelector('.buttons').style.display = 'none';
-    document.getElementById('counter').style.display = 'none';
-    document.getElementById('winScreen').style.display = 'flex';
+    const parsed = JSON.parse(textBlock.text);
+    pdfResults = parsed.measurements || [];
 
-    launchConfetti();
-  }
-
-  function launchConfetti() {
-    const colors = ['#f857a6','#ff5858','#ffd700','#a0f0a0','#87ceeb','#ff8c00'];
-    for (let i = 0; i < 120; i++) {
-      const el = document.createElement('div');
-      el.className = 'confetti-piece';
-      el.style.left = Math.random() * 100 + 'vw';
-      el.style.top = '-20px';
-      el.style.background = colors[Math.floor(Math.random() * colors.length)];
-      el.style.animationDuration = (Math.random() * 2 + 2) + 's';
-      el.style.animationDelay = (Math.random() * 1.5) + 's';
-      el.style.width = el.style.height = (Math.random() * 8 + 6) + 'px';
-      document.body.appendChild(el);
-      el.addEventListener('animationend', () => el.remove());
+    if (!pdfResults.length) {
+      showStatus("info", "No feet/inches measurements were found in this PDF. If the plan uses a different format, try the manual converter.");
+      return;
     }
+    renderPdf();
+    showStatus("success", "✓ Found " + pdfResults.length + " measurement" + (pdfResults.length === 1 ? "" : "s") + " and converted to millimetres.");
+  } catch (err) {
+    let msg = err.message || String(err);
+    if (msg.includes("Failed to fetch")) msg = "Network/CORS error reaching api.anthropic.com. Check your internet connection and that the API key is valid.";
+    showStatus("error", "⚠ " + escapeHtml(msg));
+  } finally {
+    analyzeBtn.disabled = false;
   }
+};
+
+function renderPdf() {
+  pdfBody.innerHTML = pdfResults.map(r => {
+    const mm = toMm(r.feet, r.inches);
+    return `<tr>
+      <td class="roomname">${escapeHtml(r.room)}</td>
+      <td>${escapeHtml(r.dimension)}</td>
+      <td class="orig">${escapeHtml(r.original)}</td>
+      <td>${fmtFtIn(r.feet, r.inches)}</td>
+      <td class="mm">${fmtMm(mm)}</td>
+      <td class="meters">${fmtM(mm)}</td>
+    </tr>`;
+  }).join("");
+  pdfTableWrap.style.display = "block";
+  pdfToolbar.style.display = "flex";
+}
+
+document.getElementById("pdfCsv").onclick = () => exportCsv(pdfResults.map(r => {
+  const mm = toMm(r.feet, r.inches);
+  return { Room: r.room, Dimension: r.dimension, OnPlan: r.original, Feet: r.feet, Inches: r.inches, Millimetres: Math.round(mm), Metres: (mm/1000).toFixed(3) };
+}), "planconvert-pdf.csv");
+document.getElementById("pdfPrint").onclick = () => window.print();
+document.getElementById("pdfToManual").onclick = () => {
+  pdfResults.forEach(r => manualRows.push({ name: r.room + " — " + r.dimension, feet: Number(r.feet||0), inches: Number(r.inches||0) }));
+  renderManual();
+  document.querySelector('.tab[data-tab="manual"]').click();
+};
+
+/* First-run hint */
+if (!getKey()) {
+  // gentle nudge only on PDF tab usage; nothing intrusive on load
+}
 </script>
-
 </body>
 </html>
