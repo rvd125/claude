@@ -1,309 +1,758 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>A Very Important Question 💕</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Catan Map Generator — The First Island</title>
+<style>
+  :root {
+    --gold: #e3b15f;
+    --gold-soft: rgba(227, 177, 95, 0.55);
+    --ink: #f4e6cf;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
-    body {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #ff9a9e, #fad0c4, #ffecd2);
-      background-size: 400% 400%;
-      animation: gradientShift 6s ease infinite;
-      overflow: hidden;
-    }
+  html, body { height: 100%; }
 
-    @keyframes gradientShift {
-      0%   { background-position: 0% 50%; }
-      50%  { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: var(--ink);
+    background:
+      radial-gradient(120% 70% at 50% 16%, rgba(255,245,210,0.95) 0%, rgba(244,200,115,0.0) 42%),
+      linear-gradient(180deg, #f6cf7e 0%, #eab866 28%, #c98f4e 58%, #5f4630 100%);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
 
-    .card {
-      background: rgba(255, 255, 255, 0.85);
-      backdrop-filter: blur(10px);
-      border-radius: 24px;
-      padding: 48px 40px;
-      max-width: 480px;
-      width: 90%;
-      text-align: center;
-      box-shadow: 0 20px 60px rgba(255, 100, 130, 0.25);
-      position: relative;
-    }
+  .app {
+    max-width: 540px;
+    margin: 0 auto;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: env(safe-area-inset-top) 18px env(safe-area-inset-bottom);
+  }
 
-    .emoji {
-      font-size: 72px;
-      display: block;
-      margin-bottom: 20px;
-      animation: bounce 1.5s infinite;
-    }
+  /* ---------- Board ---------- */
+  .board-wrap {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 0;
+    padding: 24px 0 8px;
+  }
+  svg#board { width: 100%; height: auto; max-height: 62vh; overflow: visible; }
 
-    @keyframes bounce {
-      0%, 100% { transform: translateY(0); }
-      50%       { transform: translateY(-10px); }
-    }
+  .tile-stroke { stroke: rgba(40,26,12,0.45); stroke-width: 2; }
+  .token { cursor: pointer; transition: opacity .18s ease; }
+  .token:hover { opacity: 0.82; }
+  .token.hidden-token { opacity: 0; }
+  .token-num { font-weight: 800; text-anchor: middle; }
+  .token-num.hot { fill: #c0392b; }
+  .token-num.cool { fill: #2c2118; }
+  .harbor-tri { stroke: rgba(40,26,12,0.4); stroke-width: 1.5; }
+  .harbor-dock { stroke: rgba(60,40,20,0.55); stroke-width: 3; stroke-linecap: round; }
+  .harbor-label { font-size: 15px; font-weight: 800; text-anchor: middle; fill: #2c2118; }
 
-    h1 {
-      font-size: 1.6rem;
-      color: #c0395a;
-      margin-bottom: 12px;
-      line-height: 1.3;
-    }
+  /* ---------- Controls ---------- */
+  .title {
+    text-align: center;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #4a341f;
+    text-shadow: 0 1px 2px rgba(255,255,255,0.25);
+    margin: 6px 0 18px;
+  }
 
-    .subtitle {
-      font-size: 0.95rem;
-      color: #888;
-      margin-bottom: 32px;
-      font-style: italic;
-    }
+  .controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding-bottom: 4px;
+  }
 
-    .buttons {
-      display: flex;
-      gap: 16px;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
+  .round-btn, .pill-btn {
+    background: rgba(0,0,0,0.18);
+    border: 2px solid var(--gold);
+    color: var(--gold);
+    border-radius: 999px;
+    cursor: pointer;
+    transition: transform .12s ease, background .2s ease;
+    backdrop-filter: blur(4px);
+  }
+  .round-btn { width: 64px; height: 64px; display: grid; place-items: center; flex: 0 0 auto; }
+  .round-btn svg { width: 28px; height: 28px; stroke: var(--gold); fill: none; stroke-width: 2.2; }
+  .pill-btn {
+    flex: 1;
+    max-width: 260px;
+    height: 64px;
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: .3px;
+  }
+  .round-btn:active, .pill-btn:active { transform: scale(0.95); }
+  .round-btn:hover, .pill-btn:hover { background: rgba(0,0,0,0.30); }
 
-    button {
-      padding: 14px 36px;
-      border: none;
-      border-radius: 50px;
-      font-size: 1.1rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: transform 0.15s, box-shadow 0.15s;
-    }
+  .accept-row { display: flex; justify-content: center; padding: 16px 0 26px; }
+  .accept-btn {
+    background: linear-gradient(135deg, #4caf6a, #2e8b57);
+    border: none;
+    color: #fff;
+    font-size: 1.15rem;
+    font-weight: 800;
+    letter-spacing: .4px;
+    padding: 16px 54px;
+    border-radius: 999px;
+    cursor: pointer;
+    box-shadow: 0 8px 22px rgba(20, 90, 50, 0.45);
+    transition: transform .12s ease, box-shadow .2s ease;
+  }
+  .accept-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(20,90,50,.5); }
+  .accept-btn:active { transform: scale(0.96); }
 
-    button:active { transform: scale(0.96); }
+  /* ---------- Toast ---------- */
+  .toast {
+    position: fixed;
+    left: 50%; bottom: 32px;
+    transform: translateX(-50%) translateY(20px);
+    background: rgba(20,14,6,0.92);
+    color: #f4e6cf;
+    padding: 12px 22px;
+    border-radius: 14px;
+    font-size: .95rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .25s ease, transform .25s ease;
+    z-index: 60;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-    .btn-yes {
-      background: linear-gradient(135deg, #f857a6, #ff5858);
-      color: white;
-      box-shadow: 0 6px 20px rgba(248, 87, 166, 0.4);
-    }
+  /* ---------- Configurations sheet ---------- */
+  .sheet-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.55);
+    opacity: 0; pointer-events: none;
+    transition: opacity .28s ease;
+    z-index: 40;
+  }
+  .sheet-backdrop.open { opacity: 1; pointer-events: auto; }
 
-    .btn-yes:hover {
-      transform: scale(1.06);
-      box-shadow: 0 10px 28px rgba(248, 87, 166, 0.5);
-    }
+  .sheet {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    max-width: 540px;
+    margin: 0 auto;
+    height: 92vh;
+    background: #1c1c1e;
+    border-radius: 18px 18px 0 0;
+    transform: translateY(100%);
+    transition: transform .32s cubic-bezier(.22,.61,.36,1);
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 -12px 40px rgba(0,0,0,0.5);
+  }
+  .sheet.open { transform: translateY(0); }
 
-    .btn-no {
-      background: #f0f0f0;
-      color: #555;
-      position: relative;
-    }
+  .sheet-header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 18px 16px 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .sheet-header h2 { font-size: 1.25rem; font-weight: 700; color: #fff; }
+  .done-btn {
+    position: absolute; left: 16px;
+    background: none; border: none;
+    color: #9b9b9f; font-size: 1.05rem; cursor: pointer; padding: 4px 8px;
+  }
+  .done-btn:active { opacity: .6; }
 
-    .btn-no:hover { background: #e4e4e4; }
+  .sheet-body { overflow-y: auto; padding: 18px 16px 40px; -webkit-overflow-scrolling: touch; }
 
-    /* WIN SCREEN */
-    .win-screen {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      gap: 16px;
-    }
+  .section { margin-bottom: 26px; }
+  .section > h3 {
+    color: #fff; font-size: 1.45rem; font-weight: 600;
+    margin: 0 4px 12px;
+  }
+  .option-group {
+    background: #2c2c2e;
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 18px;
+    cursor: pointer;
+    position: relative;
+  }
+  .option + .option { border-top: 1px solid rgba(255,255,255,0.08); }
+  .option:active { background: #38383a; }
+  .option .opt-text .opt-title { color: #fff; font-size: 1.25rem; font-weight: 500; }
+  .option .opt-text .opt-sub { color: #8e8e93; font-size: 1rem; margin-top: 3px; }
+  .check { color: #9b9b9f; font-size: 1.5rem; opacity: 0; flex: 0 0 auto; margin-left: 12px; }
+  .option.selected .check { opacity: 1; }
 
-    .win-screen .big-kiss {
-      font-size: 120px;
-      animation: heartPop 0.6s ease-out forwards;
-    }
+  .reset-group { margin-top: 8px; }
+  .reset-btn {
+    width: 100%;
+    background: #2c2c2e;
+    border: none;
+    color: #fff;
+    font-size: 1.2rem;
+    padding: 18px;
+    border-radius: 14px;
+    cursor: pointer;
+    text-align: left;
+  }
+  .reset-btn:active { background: #38383a; }
 
-    @keyframes heartPop {
-      0%   { transform: scale(0) rotate(-20deg); opacity: 0; }
-      70%  { transform: scale(1.2) rotate(5deg); opacity: 1; }
-      100% { transform: scale(1) rotate(0deg); opacity: 1; }
-    }
+  /* ---------- Good Luck overlay ---------- */
+  .luck-overlay {
+    position: fixed; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 18px;
+    background: radial-gradient(120% 90% at 50% 40%, rgba(40,28,12,0.92), rgba(10,6,2,0.96));
+    opacity: 0; pointer-events: none;
+    transition: opacity .35s ease;
+    z-index: 70;
+    text-align: center;
+    padding: 24px;
+  }
+  .luck-overlay.show { opacity: 1; pointer-events: auto; }
+  .luck-dice { font-size: 92px; animation: rollDice 1s ease-out both; }
+  @keyframes rollDice {
+    0% { transform: scale(0) rotate(-90deg); opacity: 0; }
+    60% { transform: scale(1.25) rotate(20deg); opacity: 1; }
+    100% { transform: scale(1) rotate(0); opacity: 1; }
+  }
+  .luck-title {
+    font-size: 2.6rem; font-weight: 900; color: #ffd87a;
+    text-shadow: 0 3px 18px rgba(255,180,60,0.6);
+    animation: luckIn .7s .25s both;
+    line-height: 1.15;
+  }
+  .luck-sub { color: #e9d4a8; font-size: 1.1rem; animation: luckIn .7s .5s both; }
+  .luck-close {
+    margin-top: 14px;
+    background: rgba(255,255,255,0.12);
+    border: 2px solid var(--gold);
+    color: var(--gold);
+    font-size: 1rem; font-weight: 700;
+    padding: 12px 38px; border-radius: 999px; cursor: pointer;
+    animation: luckIn .7s .7s both;
+  }
+  @keyframes luckIn { from { opacity:0; transform: translateY(18px);} to {opacity:1; transform: translateY(0);} }
 
-    .win-text {
-      font-size: 2rem;
-      font-weight: 900;
-      color: #c0395a;
-      animation: fadeSlideIn 0.8s 0.4s both;
-    }
-
-    .win-sub {
-      font-size: 1.1rem;
-      color: #888;
-      animation: fadeSlideIn 0.8s 0.7s both;
-    }
-
-    @keyframes fadeSlideIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    /* confetti */
-    .confetti-piece {
-      position: fixed;
-      width: 10px;
-      height: 10px;
-      border-radius: 2px;
-      animation: fall linear forwards;
-      pointer-events: none;
-    }
-
-    @keyframes fall {
-      0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
-      100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
-    }
-
-    .counter {
-      margin-top: 16px;
-      font-size: 0.8rem;
-      color: #bbb;
-    }
-  </style>
+  .confetti-piece { position: fixed; width: 10px; height: 10px; border-radius: 2px; pointer-events: none; animation: fall linear forwards; z-index: 65; }
+  @keyframes fall { 0% { transform: translateY(-20px) rotate(0); opacity: 1;} 100% { transform: translateY(110vh) rotate(720deg); opacity: 0;} }
+</style>
 </head>
 <body>
-
-<div class="card" id="questionCard">
-  <span class="emoji" id="emoji">😏</span>
-  <h1 id="question">Hey babe… wanna get banged? 😈</h1>
-  <p class="subtitle" id="subtitle">Think carefully before you answer…</p>
-
-  <div class="buttons">
-    <button class="btn-yes" onclick="sayYes()">Yes 💕</button>
-    <button class="btn-no" id="noBtn" onclick="sayNo()">No 🙅‍♀️</button>
+<div class="app">
+  <div class="board-wrap">
+    <svg id="board" viewBox="-330 -300 660 600" aria-label="Catan board"></svg>
   </div>
 
-  <div class="counter" id="counter"></div>
+  <div class="title">The First Island (3–4 Players)</div>
 
-  <div class="win-screen" id="winScreen">
-    <div class="big-kiss">😘</div>
-    <div class="win-text">Let's goooooo guuuuurl!! 🎉</div>
-    <div class="win-sub">Knew you'd come around 😏💖</div>
+  <div class="controls">
+    <button class="round-btn" id="settingsBtn" aria-label="Settings">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 13.5a7.6 7.6 0 0 0 .05-3l1.6-1.25-1.6-2.77-1.9.77a7.6 7.6 0 0 0-2.6-1.5L14.2 2h-3.2l-.3 2.02a7.6 7.6 0 0 0-2.6 1.5l-1.9-.77-1.6 2.77L4.2 10.5a7.6 7.6 0 0 0 0 3l-1.6 1.25 1.6 2.77 1.9-.77a7.6 7.6 0 0 0 2.6 1.5L11 22h3.2l.3-2.02a7.6 7.6 0 0 0 2.6-1.5l1.9.77 1.6-2.77z"/></svg>
+    </button>
+    <button class="pill-btn" id="generateBtn">Generate</button>
+    <button class="round-btn" id="shareBtn" aria-label="Share">
+      <svg viewBox="0 0 24 24"><path d="M12 16V4"/><path d="M8 8l4-4 4 4"/><path d="M5 12v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>
+    </button>
+  </div>
+
+  <div class="accept-row">
+    <button class="accept-btn" id="acceptBtn">Accept</button>
   </div>
 </div>
 
+<!-- Configurations sheet -->
+<div class="sheet-backdrop" id="sheetBackdrop"></div>
+<div class="sheet" id="sheet">
+  <div class="sheet-header">
+    <button class="done-btn" id="doneBtn">Done</button>
+    <h2>Configurations</h2>
+  </div>
+  <div class="sheet-body" id="sheetBody"><!-- built by JS --></div>
+</div>
+
+<!-- Good Luck overlay -->
+<div class="luck-overlay" id="luckOverlay">
+  <div class="luck-dice">🎲</div>
+  <div class="luck-title">Good Luck Calichines</div>
+  <div class="luck-sub">May the dice ever roll in your favour 🎲🏝️</div>
+  <button class="luck-close" id="luckClose">Let's Play</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
 <script>
-  const rounds = [
-    {
-      emoji: "😏",
-      q: "Hey babe… wanna get banged? 😈",
-      sub: "Think carefully before you answer…"
-    },
-    {
-      emoji: "🥺",
-      q: "Are you SURE you don't want to get banged?",
-      sub: "Really really sure? …Really?"
-    },
-    {
-      emoji: "🤔",
-      q: "What if I told you it would be amazing?",
-      sub: "Scientifically proven. Probably."
-    },
-    {
-      emoji: "😤",
-      q: "Ok fine. But… bang tho? 🥁",
-      sub: "This is your third chance. Just saying."
-    },
-    {
-      emoji: "🐶",
-      q: "Even the dog thinks you should say yes.",
-      sub: "He told me himself."
-    },
-    {
-      emoji: "🕵️",
-      q: "Sources confirm: saying yes is the move.",
-      sub: "Multiple sources. Very reliable."
-    },
-    {
-      emoji: "🎯",
-      q: "Fun fact: people who say yes live 10 years longer.",
-      sub: "I made that up but still."
-    },
-    {
-      emoji: "🌈",
-      q: "Imagine how great you'd feel if you just said yes.",
-      sub: "Breathtaking. Life-changing. Magical."
-    },
-    {
-      emoji: "😂",
-      q: "Girl… it's just a bang. C'mon now.",
-      sub: "We're on attempt #ATTEMPT#. At this point…"
-    },
-    {
-      emoji: "🙏",
-      q: "I'm literally begging you. BANG?",
-      sub: "On my knees. Metaphorically. (Or not.)"
-    },
-    {
-      emoji: "💀",
-      q: "You've said no #ATTEMPT# times. Legend status.",
-      sub: "But also… yes? 👀"
-    },
-    {
-      emoji: "🔁",
-      q: "I will literally keep asking forever.",
-      sub: "This is not a threat. It is a promise. 💕"
-    }
-  ];
+/* ======================================================================
+   Settlers of Catan — Standard (3–4 player) board generator
+   ====================================================================== */
 
-  let attempt = 0;
+const SQRT3 = Math.sqrt(3);
+const SIZE = 52;                 // hex circumradius (px)
+const HEX_W = SQRT3 * SIZE;      // pointy-top width
+const HEX_H = 2 * SIZE;          // pointy-top height
 
-  function getQuestion() {
-    const r = rounds[Math.min(attempt, rounds.length - 1)];
-    return {
-      emoji: r.emoji,
-      q: r.q.replace('#ATTEMPT#', attempt),
-      sub: r.sub.replace('#ATTEMPT#', attempt)
-    };
-  }
+/* ---- Resource / tile definitions ---- */
+const TILES = {
+  forest:   { wood: true,  color: '#3f7d3a', label: 'Forest',   res: 'wood'  },
+  pasture:  { color: '#8fc06a', label: 'Pasture',  res: 'sheep' },
+  field:    { color: '#d9b630', label: 'Field',    res: 'wheat' },
+  hill:     { color: '#b65a2a', label: 'Hill',     res: 'brick' },
+  mountain: { color: '#5d7287', label: 'Mountain', res: 'ore'   },
+  desert:   { color: '#e8d39a', label: 'Desert',   res: null    },
+};
 
-  function sayNo() {
-    attempt++;
-    const { emoji, q, sub } = getQuestion();
-    document.getElementById('emoji').textContent = emoji;
-    document.getElementById('question').textContent = q;
-    document.getElementById('subtitle').textContent = sub;
+/* Standard tile multiset (19 tiles) */
+const TILE_BAG = [
+  ...Array(4).fill('forest'),
+  ...Array(4).fill('pasture'),
+  ...Array(4).fill('field'),
+  ...Array(3).fill('hill'),
+  ...Array(3).fill('mountain'),
+  'desert',
+];
 
-    if (attempt > 2) {
-      document.getElementById('counter').textContent =
-        `No count: ${attempt} 😬`;
-    }
+/* Standard number tokens (18, desert has none) */
+const NUMBER_BAG = [2, 3, 3, 4, 4, 5, 5, 6, 6, 8, 8, 9, 9, 10, 10, 11, 11, 12];
 
-    // Wiggle the No button away a little for fun
-    const btn = document.getElementById('noBtn');
-    const x = (Math.random() - 0.5) * 60;
-    const y = (Math.random() - 0.5) * 30;
-    btn.style.transform = `translate(${x}px, ${y}px)`;
-    setTimeout(() => btn.style.transform = '', 400);
-  }
+/* Harbor types — 4 generic (3:1) + 5 specific (2:1) */
+const HARBOR_STANDARD = ['3:1', 'ore', '3:1', 'sheep', '3:1', 'wheat', 'brick', '3:1', 'wood'];
+const HARBOR_ICON = { '3:1': '3:1', wood: '🌲', brick: '🧱', sheep: '🐑', wheat: '🌾', ore: '⛏️' };
+const HARBOR_FILL = { '3:1': '#cdbfa6', wood: '#3f7d3a', brick: '#b65a2a', sheep: '#8fc06a', wheat: '#d9b630', ore: '#5d7287' };
 
-  function sayYes() {
-    // Hide question, show win
-    document.getElementById('emoji').style.display = 'none';
-    document.getElementById('question').style.display = 'none';
-    document.getElementById('subtitle').style.display = 'none';
-    document.querySelector('.buttons').style.display = 'none';
-    document.getElementById('counter').style.display = 'none';
-    document.getElementById('winScreen').style.display = 'flex';
+/* Pips (probability dots) for each number */
+const pips = (n) => 6 - Math.abs(7 - n);
 
-    launchConfetti();
-  }
+/* ---- Axial hex grid, radius 2 (pointy-top) → 19 hexes ---- */
+const DIRS = [        // neighbour directions, ordered by outward angle 0..300
+  { q: +1, r: 0, ang: 0,   verts: [-30, 30] },
+  { q: 0,  r: +1, ang: 60,  verts: [30, 90] },
+  { q: -1, r: +1, ang: 120, verts: [90, 150] },
+  { q: -1, r: 0, ang: 180, verts: [150, 210] },
+  { q: 0,  r: -1, ang: 240, verts: [210, 270] },
+  { q: +1, r: -1, ang: 300, verts: [270, 330] },
+];
 
-  function launchConfetti() {
-    const colors = ['#f857a6','#ff5858','#ffd700','#a0f0a0','#87ceeb','#ff8c00'];
-    for (let i = 0; i < 120; i++) {
-      const el = document.createElement('div');
-      el.className = 'confetti-piece';
-      el.style.left = Math.random() * 100 + 'vw';
-      el.style.top = '-20px';
-      el.style.background = colors[Math.floor(Math.random() * colors.length)];
-      el.style.animationDuration = (Math.random() * 2 + 2) + 's';
-      el.style.animationDelay = (Math.random() * 1.5) + 's';
-      el.style.width = el.style.height = (Math.random() * 8 + 6) + 'px';
-      document.body.appendChild(el);
-      el.addEventListener('animationend', () => el.remove());
+function buildHexes() {
+  const hexes = [];
+  for (let q = -2; q <= 2; q++) {
+    for (let r = -2; r <= 2; r++) {
+      const s = -q - r;
+      if (Math.abs(s) > 2) continue;
+      const x = HEX_W * (q + r / 2);
+      const y = SIZE * 1.5 * r;
+      hexes.push({ q, r, s, x, y, key: q + ',' + r });
     }
   }
+  return hexes;
+}
+
+const HEXES = buildHexes();                       // 19 hexes
+const KEY_TO_IDX = {};
+HEXES.forEach((h, i) => (KEY_TO_IDX[h.key] = i));
+
+/* Precompute neighbour indices */
+const NEIGHBORS = HEXES.map((h) => {
+  const out = [];
+  for (const d of DIRS) {
+    const k = (h.q + d.q) + ',' + (h.r + d.r);
+    if (k in KEY_TO_IDX) out.push(KEY_TO_IDX[k]);
+  }
+  return out;
+});
+
+const isPerimeter = (h) => Math.max(Math.abs(h.q), Math.abs(h.r), Math.abs(h.s)) === 2;
+
+/* ---- Outer edges → harbor anchor positions (pick 9 evenly) ---- */
+function buildHarborSlots() {
+  const edges = [];
+  HEXES.forEach((h, i) => {
+    DIRS.forEach((d) => {
+      const k = (h.q + d.q) + ',' + (h.r + d.r);
+      if (k in KEY_TO_IDX) return;                // has neighbour → interior edge
+      const a = (d.ang * Math.PI) / 180;
+      const mx = h.x + Math.cos(a) * (SIZE * SQRT3 / 2) * 0.0 + Math.cos(a) * (SIZE * 0.0);
+      // edge midpoint (outward) — place harbor beyond edge
+      const ox = h.x + Math.cos(a) * HEX_W * 0.62;
+      const oy = h.y + Math.sin(a) * HEX_W * 0.62;
+      const ang = Math.atan2(oy, ox);
+      // two shared vertices of this edge
+      const v = d.verts.map((deg) => {
+        const ra = (deg * Math.PI) / 180;
+        return { x: h.x + Math.cos(ra) * SIZE, y: h.y + Math.sin(ra) * SIZE };
+      });
+      edges.push({ hex: i, ox, oy, ang, dir: d, v });
+    });
+  });
+  edges.sort((a, b) => a.ang - b.ang);
+  // pick 9 evenly spaced around the ring
+  const slots = [];
+  for (let i = 0; i < 9; i++) {
+    slots.push(edges[Math.round((i * edges.length) / 9) % edges.length]);
+  }
+  return slots;
+}
+const HARBOR_SLOTS = buildHarborSlots();
+
+/* ======================================================================
+   Configuration state
+   ====================================================================== */
+const DEFAULT_CONFIG = { tiles: 'random', numbers: 'random', harbors: 'standard', desert: 'random' };
+let config = { ...DEFAULT_CONFIG };
+
+const CONFIG_SCHEMA = [
+  { key: 'tiles', title: 'Tiles', options: [
+    { id: 'random',   title: 'Random',   sub: 'Randomly generate board tiles' },
+    { id: 'balanced', title: 'Balanced', sub: 'No two adjacent tiles of the same type' },
+  ]},
+  { key: 'numbers', title: 'Number tokens', options: [
+    { id: 'random',   title: 'Random',   sub: 'Randomly places numbers' },
+    { id: 'balanced', title: 'Balanced', sub: 'No two adjacent hot (6s & 8s) tokens' },
+    { id: 'strict',   title: 'Strict',   sub: 'No two adjacent same numbers' },
+  ]},
+  { key: 'harbors', title: 'Harbors', options: [
+    { id: 'random',   title: 'Random',   sub: 'Randomly places harbors' },
+    { id: 'standard', title: 'Standard', sub: 'Placed in default board positions' },
+  ]},
+  { key: 'desert', title: 'Desert', options: [
+    { id: 'random', title: 'Random', sub: 'Randomly places desert tile' },
+    { id: 'center', title: 'Center', sub: 'Placed in the center of the board' },
+    { id: 'coast',  title: 'Coast',  sub: "Placed on one of the board's edges" },
+  ]},
+];
+
+/* ======================================================================
+   Random helpers
+   ====================================================================== */
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+const randItem = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+/* ======================================================================
+   Board generation
+   ====================================================================== */
+function generateBoard() {
+  /* 1. Desert position */
+  let desertIdx;
+  if (config.desert === 'center') {
+    desertIdx = KEY_TO_IDX['0,0'];
+  } else if (config.desert === 'coast') {
+    desertIdx = randItem(HEXES.map((h, i) => i).filter((i) => isPerimeter(HEXES[i])));
+  } else {
+    desertIdx = Math.floor(Math.random() * HEXES.length);
+  }
+
+  /* 2. Tile types */
+  const nonDesertTypes = TILE_BAG.filter((t) => t !== 'desert');
+  const types = assignTiles(desertIdx, nonDesertTypes);
+
+  /* 3. Number tokens (skip desert) */
+  const numbers = assignNumbers(types, desertIdx);
+
+  /* 4. Harbors */
+  const harborTypes =
+    config.harbors === 'standard' ? HARBOR_STANDARD.slice() : shuffle(HARBOR_STANDARD);
+
+  return { types, numbers, desertIdx, harborTypes };
+}
+
+function assignTiles(desertIdx, nonDesertTypes) {
+  const slots = HEXES.map((_, i) => i).filter((i) => i !== desertIdx);
+  const attempts = config.tiles === 'balanced' ? 3000 : 1;
+  let best = null, bestConflicts = Infinity;
+
+  for (let a = 0; a < attempts; a++) {
+    const bag = shuffle(nonDesertTypes);
+    const types = new Array(HEXES.length);
+    types[desertIdx] = 'desert';
+    slots.forEach((s, i) => (types[s] = bag[i]));
+
+    if (config.tiles !== 'balanced') return types;
+
+    let conflicts = 0;
+    for (let i = 0; i < HEXES.length; i++) {
+      for (const n of NEIGHBORS[i]) {
+        if (n > i && types[i] !== 'desert' && types[i] === types[n]) conflicts++;
+      }
+    }
+    if (conflicts === 0) return types;
+    if (conflicts < bestConflicts) { bestConflicts = conflicts; best = types; }
+  }
+  return best;
+}
+
+function assignNumbers(types, desertIdx) {
+  const slots = HEXES.map((_, i) => i).filter((i) => i !== desertIdx);
+  const isHot = (n) => n === 6 || n === 8;
+  const attempts = config.numbers === 'random' ? 1 : 4000;
+  let best = null, bestConflicts = Infinity;
+
+  for (let a = 0; a < attempts; a++) {
+    const bag = shuffle(NUMBER_BAG);
+    const numbers = new Array(HEXES.length).fill(null);
+    slots.forEach((s, i) => (numbers[s] = bag[i]));
+
+    if (config.numbers === 'random') return numbers;
+
+    let conflicts = 0;
+    for (let i = 0; i < HEXES.length; i++) {
+      if (numbers[i] == null) continue;
+      for (const n of NEIGHBORS[i]) {
+        if (n <= i || numbers[n] == null) continue;
+        if (config.numbers === 'balanced' && isHot(numbers[i]) && isHot(numbers[n])) conflicts++;
+        if (config.numbers === 'strict' && numbers[i] === numbers[n]) conflicts++;
+      }
+    }
+    if (conflicts === 0) return numbers;
+    if (conflicts < bestConflicts) { bestConflicts = conflicts; best = numbers; }
+  }
+  return best;
+}
+
+/* ======================================================================
+   Rendering (SVG)
+   ====================================================================== */
+const SVGNS = 'http://www.w3.org/2000/svg';
+function el(name, attrs) {
+  const e = document.createElementNS(SVGNS, name);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  return e;
+}
+function hexPath(cx, cy) {
+  let p = '';
+  for (let i = 0; i < 6; i++) {
+    const ang = ((60 * i - 30) * Math.PI) / 180; // pointy-top: first vertex at -30°
+    const x = cx + SIZE * Math.cos(ang);
+    const y = cy + SIZE * Math.sin(ang);
+    p += (i === 0 ? 'M' : 'L') + x.toFixed(2) + ',' + y.toFixed(2);
+  }
+  return p + 'Z';
+}
+
+let currentBoard = null;
+
+function renderBoard(board) {
+  currentBoard = board;
+  const svg = document.getElementById('board');
+  svg.innerHTML = '';
+
+  /* Harbors first (behind tiles) */
+  HARBOR_SLOTS.forEach((slot, i) => {
+    const type = board.harborTypes[i];
+    // dock lines from harbor anchor to the two edge vertices
+    slot.v.forEach((vtx) => {
+      svg.appendChild(el('line', {
+        x1: slot.ox, y1: slot.oy, x2: vtx.x, y2: vtx.y, class: 'harbor-dock',
+      }));
+    });
+    // harbor marker (rounded triangle-ish disc)
+    svg.appendChild(el('circle', {
+      cx: slot.ox, cy: slot.oy, r: 20, fill: HARBOR_FILL[type], class: 'harbor-tri',
+    }));
+    const t = el('text', {
+      x: slot.ox, y: slot.oy + (type === '3:1' ? 5 : 6),
+      class: 'harbor-label',
+      'font-size': type === '3:1' ? 15 : 18,
+    });
+    t.textContent = HARBOR_ICON[type];
+    svg.appendChild(t);
+  });
+
+  /* Tiles */
+  HEXES.forEach((h, i) => {
+    const type = board.types[i];
+    const g = el('g', {});
+    g.appendChild(el('path', { d: hexPath(h.x, h.y), fill: TILES[type].color, class: 'tile-stroke' }));
+    svg.appendChild(g);
+
+    const num = board.numbers[i];
+    if (num != null) {
+      // token group — click to toggle visibility (reveal resource underneath)
+      const token = el('g', { class: 'token', 'data-hex': i });
+      const hot = num === 6 || num === 8;
+      const txt = el('text', {
+        x: h.x, y: h.y - 1, class: 'token-num ' + (hot ? 'hot' : 'cool'),
+        'font-size': 30, 'dominant-baseline': 'middle',
+      });
+      txt.textContent = num;
+      token.appendChild(el('circle', { cx: h.x, cy: h.y, r: 26, fill: '#f3e3bf', stroke: 'rgba(0,0,0,0.18)', 'stroke-width': 1.5 }));
+      token.appendChild(txt);
+      const p = pips(num);
+      const gap = 6;
+      const startX = h.x - ((p - 1) * gap) / 2;
+      for (let d = 0; d < p; d++) {
+        token.appendChild(el('circle', {
+          cx: startX + d * gap, cy: h.y + 16, r: 2,
+          fill: hot ? '#c0392b' : '#2c2118',
+        }));
+      }
+      token.addEventListener('click', () => token.classList.toggle('hidden-token'));
+      svg.appendChild(token);
+    }
+  });
+}
+
+/* ======================================================================
+   UI wiring
+   ====================================================================== */
+function regenerate() {
+  renderBoard(generateBoard());
+}
+
+function buildSheet() {
+  const body = document.getElementById('sheetBody');
+  body.innerHTML = '';
+  CONFIG_SCHEMA.forEach((section) => {
+    const sec = document.createElement('div');
+    sec.className = 'section';
+    const h = document.createElement('h3');
+    h.textContent = section.title;
+    sec.appendChild(h);
+
+    const grp = document.createElement('div');
+    grp.className = 'option-group';
+    section.options.forEach((opt) => {
+      const row = document.createElement('div');
+      row.className = 'option' + (config[section.key] === opt.id ? ' selected' : '');
+      row.dataset.key = section.key;
+      row.dataset.id = opt.id;
+      row.innerHTML =
+        '<div class="opt-text"><div class="opt-title">' + opt.title +
+        '</div><div class="opt-sub">' + opt.sub + '</div></div><div class="check">✓</div>';
+      row.addEventListener('click', () => {
+        config[section.key] = opt.id;
+        grp.querySelectorAll('.option').forEach((o) => o.classList.remove('selected'));
+        row.classList.add('selected');
+        regenerate();
+      });
+      grp.appendChild(row);
+    });
+    sec.appendChild(grp);
+    body.appendChild(sec);
+  });
+
+  const resetWrap = document.createElement('div');
+  resetWrap.className = 'reset-group';
+  const reset = document.createElement('button');
+  reset.className = 'reset-btn';
+  reset.textContent = 'Reset to Default';
+  reset.addEventListener('click', () => {
+    config = { ...DEFAULT_CONFIG };
+    buildSheet();
+    regenerate();
+    toast('Reset to default');
+  });
+  resetWrap.appendChild(reset);
+  body.appendChild(resetWrap);
+}
+
+function openSheet() {
+  buildSheet();
+  document.getElementById('sheet').classList.add('open');
+  document.getElementById('sheetBackdrop').classList.add('open');
+}
+function closeSheet() {
+  document.getElementById('sheet').classList.remove('open');
+  document.getElementById('sheetBackdrop').classList.remove('open');
+}
+
+/* Toast */
+let toastTimer;
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+/* Share */
+async function share() {
+  if (!currentBoard) return;
+  const summary = describeBoard(currentBoard);
+  try {
+    if (navigator.share) {
+      await navigator.share({ title: 'My Catan Board', text: summary });
+      return;
+    }
+  } catch (e) { /* user cancelled */ return; }
+  try {
+    await navigator.clipboard.writeText(summary);
+    toast('Board copied to clipboard 🏝️');
+  } catch (e) {
+    toast('Sharing not supported');
+  }
+}
+function describeBoard(board) {
+  const lines = ['🏝️ Catan — The First Island'];
+  HEXES.forEach((h, i) => {
+    const t = TILES[board.types[i]].label;
+    const n = board.numbers[i] != null ? ' #' + board.numbers[i] : '';
+    lines.push(t + n);
+  });
+  lines.push('Harbors: ' + board.harborTypes.map((h) => HARBOR_ICON[h]).join(' '));
+  return lines.join('\n');
+}
+
+/* Good Luck overlay + confetti */
+function showLuck() {
+  const ov = document.getElementById('luckOverlay');
+  ov.classList.add('show');
+  launchConfetti();
+}
+function hideLuck() {
+  document.getElementById('luckOverlay').classList.remove('show');
+}
+function launchConfetti() {
+  const colors = ['#e3b15f', '#3f7d3a', '#b65a2a', '#5d7287', '#d9b630', '#8fc06a', '#fff3cf'];
+  for (let i = 0; i < 110; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti-piece';
+    c.style.left = Math.random() * 100 + 'vw';
+    c.style.top = '-20px';
+    c.style.background = colors[Math.floor(Math.random() * colors.length)];
+    c.style.animationDuration = (Math.random() * 2 + 2) + 's';
+    c.style.animationDelay = (Math.random() * 0.8) + 's';
+    const sz = Math.random() * 8 + 6;
+    c.style.width = c.style.height = sz + 'px';
+    document.body.appendChild(c);
+    c.addEventListener('animationend', () => c.remove());
+  }
+}
+
+/* Listeners */
+document.getElementById('generateBtn').addEventListener('click', regenerate);
+document.getElementById('settingsBtn').addEventListener('click', openSheet);
+document.getElementById('doneBtn').addEventListener('click', closeSheet);
+document.getElementById('sheetBackdrop').addEventListener('click', closeSheet);
+document.getElementById('shareBtn').addEventListener('click', share);
+document.getElementById('acceptBtn').addEventListener('click', showLuck);
+document.getElementById('luckClose').addEventListener('click', hideLuck);
+
+/* Initial board */
+regenerate();
 </script>
-
 </body>
 </html>
